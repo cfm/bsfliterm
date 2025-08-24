@@ -15,6 +15,14 @@
 #include "md5.h"
 #endif
 
+/* Helper function to get AIM server from environment variable or default */
+static const char *
+get_aim_server(void)
+{
+	const char *server = getenv("BSFLITE_AIM_SERVER");
+	return (server && *server) ? server : "login.oscar.aol.com";
+}
+
 #if 0
 #define CLIENT_IDENT "AOL Instant Messenger, version 5.5.3595/WIN32"
 #define CLIENT_V1 0x0109
@@ -143,7 +151,7 @@ imcomm_im_signon(void *handle, const char *sn, const char *pw)
 		initialized = 1;
 	}
 	err =
-		StrToAddr("login.oscar.aol.com", &hostinfo, mactcp_lookupdone_upp,
+		StrToAddr(get_aim_server(), &hostinfo, mactcp_lookupdone_upp,
 			  (char *) &resolverDone);
 	if (err == cacheFault)
 		while (!resolverDone)
@@ -204,13 +212,13 @@ imcomm_im_signon(void *handle, const char *sn, const char *pw)
 #endif
 
 	if (((IMCOMM *) handle)->proxymode == PROXY_TYPE_SOCKS5) {
-		connect_socks5(handle, "login.oscar.aol.com",
+		connect_socks5(handle, get_aim_server(),
 			       ((IMCOMM *) handle)->oscarport);
 	} else if (((IMCOMM *) handle)->proxymode == PROXY_TYPE_HTTPS) {
-		connect_https(handle, "login.oscar.aol.com",
+		connect_https(handle, get_aim_server(),
 			      ((IMCOMM *) handle)->oscarport);
 	} else {
-		if ((he = gethostbyname("login.oscar.aol.com")) == NULL) {
+		if ((he = gethostbyname(get_aim_server())) == NULL) {
 			perror("gethostbyname()");
 			return IMCOMM_RET_ERROR;
 		}
